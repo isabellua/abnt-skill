@@ -29,10 +29,14 @@ def cfg_pagina(doc):
     s.page_width = Cm(21)
 
 
+PRETO = RGBColor(0, 0, 0)
+
+
 def cfg_normal(doc):
     e = doc.styles["Normal"]
     e.font.name = FONTE
     e.font.size = Pt(12)
+    e.font.color.rgb = PRETO
     e.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     e.paragraph_format.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
     e.paragraph_format.first_line_indent = Cm(1.25)
@@ -103,6 +107,7 @@ def para(doc, txt, bold=False, center=False, size=None, li=None,
     r.font.name = FONTE
     r.font.size = size or Pt(12)
     r.font.bold = bold
+    r.font.color.rgb = PRETO
     return pg
 
 
@@ -123,6 +128,7 @@ def titulo_secao(doc, num, t, nivel):
     r.font.size = Pt(12)
     r.font.bold = nivel in (1, 3)
     r.font.italic = nivel == 4
+    r.font.color.rgb = PRETO
 
 
 def citacao_longa(doc, txt, autor=""):
@@ -139,6 +145,7 @@ def citacao_longa(doc, txt, autor=""):
     r = pg.add_run(conteudo)
     r.font.name = FONTE
     r.font.size = Pt(10)
+    r.font.color.rgb = PRETO
 
 
 def br(doc):
@@ -207,6 +214,7 @@ def gerar_folha_rosto(doc, c):
     r = pg.add_run(nota)
     r.font.name = FONTE
     r.font.size = Pt(10)
+    r.font.color.rgb = PRETO
 
     for _ in range(6):
         br(doc)
@@ -239,6 +247,7 @@ def gerar_resumo(doc, c, idioma="pt"):
     r = pg.add_run(c.get(campo_txt, f"[{tit}]"))
     r.font.name = FONTE
     r.font.size = Pt(12)
+    r.font.color.rgb = PRETO
 
     # Linha em branco com espaçamento 1,5 antes das palavras-chave
     br(doc)
@@ -260,9 +269,11 @@ def gerar_resumo(doc, c, idioma="pt"):
     rl.bold = True
     rl.font.name = FONTE
     rl.font.size = Pt(12)
+    rl.font.color.rgb = PRETO
     rt = pg.add_run(kws_str)
     rt.font.name = FONTE
     rt.font.size = Pt(12)
+    rt.font.color.rgb = PRETO
 
     pb(doc)
 
@@ -296,6 +307,7 @@ def gerar_sumario(doc, secs):
         r.font.name = FONTE
         r.font.size = Pt(12)
         r.font.bold = nivel in (1, 3)
+        r.font.color.rgb = PRETO
         pf.tab_stops.add_tab_stop(Cm(15.5))
 
     pb(doc)
@@ -303,31 +315,54 @@ def gerar_sumario(doc, secs):
 
 # ── Elementos textuais ────────────────────────────────────────────────────────
 
+def _renderizar_secao(doc, s):
+    """Renderiza o conteúdo de uma seção (título + parágrafos + citações longas)."""
+    nivel = s.get("nivel", 1)
+    num = s.get("numero", "")
+    tit = s.get("titulo", "")
+    cont = s.get("conteudo", "")
+    citacoes = s.get("citacoes_longas", [])
+
+    titulo_secao(doc, num, tit, nivel)
+
+    if isinstance(cont, list):
+        for txt in cont:
+            if txt.strip():
+                para(doc, txt)
+    elif cont:
+        para(doc, cont)
+
+    for cit in citacoes:
+        citacao_longa(doc, cit.get("texto", ""), cit.get("autor", ""))
+
+    br(doc)
+
+
 def gerar_secoes(doc, secs):
-    """Gera seções textuais com formatação NBR 6024."""
+    """
+    Gera seções textuais com formatação NBR 6024.
+    Cada seção primária (nível 1) inicia em nova página — a quebra é inserida
+    ao final da seção anterior, não no início da próxima, para evitar páginas
+    em branco entre o sumário e a primeira seção.
+    """
+    # Agrupa seções em blocos encabeçados por uma seção primária
+    grupos = []
+    grupo_atual = []
     for s in secs:
-        nivel = s.get("nivel", 1)
-        num = s.get("numero", "")
-        tit = s.get("titulo", "")
-        cont = s.get("conteudo", "")
-        citacoes = s.get("citacoes_longas", [])
+        if s.get("nivel", 1) == 1 and grupo_atual:
+            grupos.append(grupo_atual)
+            grupo_atual = []
+        grupo_atual.append(s)
+    if grupo_atual:
+        grupos.append(grupo_atual)
 
-        if nivel == 1:
+    for i, grupo in enumerate(grupos):
+        # A quebra de página vai no FINAL de cada grupo primário, exceto o último
+        # (o último é separado das referências pelo pb() dentro de gerar_referencias)
+        for s in grupo:
+            _renderizar_secao(doc, s)
+        if i < len(grupos) - 1:
             pb(doc)
-        titulo_secao(doc, num, tit, nivel)
-
-        if isinstance(cont, list):
-            for txt in cont:
-                if txt.strip():
-                    para(doc, txt)
-        elif cont:
-            para(doc, cont)
-
-        # Citações longas opcionais por seção
-        for cit in citacoes:
-            citacao_longa(doc, cit.get("texto", ""), cit.get("autor", ""))
-
-        br(doc)
 
 
 # ── Elementos pós-textuais ────────────────────────────────────────────────────
@@ -351,6 +386,7 @@ def gerar_referencias(doc, refs):
         r = pg.add_run(ref)
         r.font.name = FONTE
         r.font.size = Pt(12)
+        r.font.color.rgb = PRETO
 
 
 def gerar_apendice_anexo(doc, itens, tipo="APÊNDICE"):

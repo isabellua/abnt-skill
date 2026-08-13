@@ -19,16 +19,38 @@ normas ABNT. O resultado principal é sempre um arquivo `.docx` pronto para impr
 
 ## Como usar esta skill
 
-1. **Entender o que o usuário precisa** — tipo de documento, conteúdo disponível, seções necessárias
-2. **Coletar o conteúdo** — peça ou use o texto já fornecido pelo usuário
-3. **Executar o script de geração** usando `scripts/gerar_abnt.py`
-4. **Entregar o `.docx` gerado** e explicar as escolhas de formatação
+1. **Entender o que o usuário precisa** — tipo de documento e conteúdo disponível
+2. **Perguntar quais seções o trabalho terá** — veja "Levantando a estrutura" abaixo
+3. **Coletar o conteúdo** — peça ou use o texto já fornecido pelo usuário
+4. **Executar o script de geração** usando `scripts/gerar_abnt.py`
+5. **Entregar o `.docx` gerado** e explicar as escolhas de formatação
+
+## Levantando a estrutura do documento
+
+**Nunca assuma que o trabalho tem introdução, desenvolvimento e conclusão.**
+A estrutura varia muito por tipo de trabalho e por exigência do orientador/instituição.
+
+Antes de gerar, pergunte:
+
+> "Quais seções seu trabalho terá? Por exemplo: introdução, revisão de literatura,
+> metodologia, resultados, discussão, conclusão — ou informe os títulos dos seus capítulos."
+
+Aceite qualquer combinação. Exemplos comuns (mas não obrigatórios):
+
+| Tipo | Estrutura textual típica |
+|---|---|
+| TCC / Monografia | Introdução → Revisão de literatura → Metodologia → Resultados → Conclusão |
+| Artigo científico | Introdução → Referencial teórico → Método → Resultados → Discussão |
+| Relatório técnico | Introdução → Desenvolvimento → Considerações finais |
+| Relato de experiência | Contextualização → Relato → Reflexões |
+
+O script aceita qualquer lista de seções — basta o usuário informar os títulos e conteúdos.
 
 ## Tipos de documentos suportados
 
-- **TCC / Monografia** — capa, folha de rosto, resumo, abstract, sumário, introdução, desenvolvimento, conclusão, referências, apêndices/anexos
+- **TCC / Monografia** — capa, folha de rosto, resumo, abstract, sumário, seções textuais livres, referências, apêndices/anexos
 - **Artigo científico** — título, autores, resumo, abstract, seções, referências
-- **Relatório técnico** — capa, sumário, introdução, corpo, conclusão, referências
+- **Relatório técnico** — capa, sumário, seções textuais, referências
 
 ## Regras de formatação ABNT (NBR 14724)
 
@@ -52,8 +74,10 @@ Consulte `references/nbr14724-formatacao.md` para regras detalhadas.
 | Numeração de páginas | Superior direito, arábicos, a 2 cm da margem superior |
 | Alinhamento texto | Justificado |
 | Alinhamento referências | À esquerda |
+| Cor da fonte | Preta (RGB 0, 0, 0) em todo o documento |
+| Quebra de página | Cada seção primária (nível 1) inicia em nova página |
 
-## Estrutura de um TCC
+## Estrutura de um trabalho acadêmico
 
 ```
 PRÉ-TEXTUAIS:
@@ -66,9 +90,10 @@ PRÉ-TEXTUAIS:
   [Listas de ilustrações, tabelas, abreviações — opcionais]
 
 TEXTUAIS:
-  Introdução
-  Desenvolvimento (capítulos temáticos)
-  Conclusão
+  [Capítulos definidos pelo usuário — perguntar antes de gerar]
+  Exemplos: Introdução, Revisão de literatura, Metodologia, Resultados,
+            Discussão, Conclusão, Considerações finais...
+  Cada capítulo/seção de nível 1 inicia em NOVA PÁGINA
 
 PÓS-TEXTUAIS:
   Referências (obrigatório)
@@ -181,6 +206,14 @@ Veja o formato do `config.json` em `references/config-schema.md`.
 
 ## Perguntas para TCC completo
 
+Faça em duas etapas: primeiro a estrutura, depois os dados.
+
+**Etapa 1 — Estrutura (perguntar sempre antes de gerar):**
+- Quais seções/capítulos textuais o trabalho terá? (títulos e ordem)
+- O trabalho tem resumo em português? E abstract em inglês?
+- Precisa de apêndice ou anexo?
+
+**Etapa 2 — Dados:**
 - Nome completo do autor
 - Título e subtítulo do trabalho
 - Instituição / Universidade / Curso
@@ -188,4 +221,4 @@ Veja o formato do `config.json` em `references/config-schema.md`.
 - Grau almejado (Bacharel, Licenciado, Tecnólogo, Especialista)
 - Cidade e ano de entrega
 - Palavras-chave (3 a 6)
-- Conteúdo das seções ou usar placeholders?
+- Conteúdo das seções ou usar placeholders `[PREENCHER]`?
